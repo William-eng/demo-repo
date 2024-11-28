@@ -304,6 +304,12 @@ This configuration sets up Loki to run on specific ports, use in-memory storage,
 
 Open the nginx.conf file and make sure the domain names match your configured domain names. Then, add the SSL paths for each domain in their respective SSL server blocks.
 
+Generating SSL certificate
+
+*.key for the private key and *.crt for public
+- 
+
+
 **Nginx.conf**
 
 
