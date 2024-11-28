@@ -307,12 +307,128 @@ Open the nginx.conf file and make sure the domain names match your configured do
 Generating SSL certificate
 
 *.key for the private key and *.crt for public
-- 
+- ![Screenshot from 2024-11-28 01-21-42](https://github.com/user-attachments/assets/982af7ba-a039-4f12-be5d-6bf077023fe6)
+
+
 
 
 **Nginx.conf**
 
 
+            version: '3.9'
+            
+            services:
+              backend:
+                build:
+                  context: ./backend
+                ports:
+                  - "8000:8000"
+                depends_on:
+                  db:
+                    condition: service_healthy
+                env_file:
+                  - ./backend/.env
+                networks:
+                  - chall_network
+            
+              frontend:
+                build:
+                  context: ./frontend
+                ports:
+                  - "80:80"
+                  - "443:443"
+                env_file:
+                  - ./frontend/.env
+                depends_on:
+                  - backend
+                networks:
+                  - chall_network
+            
+              db:
+                image: postgres:15.9-alpine3.20
+                restart: unless-stopped
+                container_name: postgres_db
+                ports:
+                  - "5432:5432"
+                volumes:
+                  - postgres_data:/var/lib/postgresql/data
+                env_file:
+                  - ./backend/.env
+                networks:
+                  - chall_network
+                healthcheck:
+                  test: ["CMD", "pg_isready", "-U", "app", "-h", "localhost"]
+                  interval: 10s
+                  timeout: 5s
+                  retries: 5
+                  start_period: 30s
+            
+              adminer:
+                image: adminer
+                container_name: adminer
+                ports:
+                  - "8081:8080"
+                networks:
+                  chall_network:
+            
+            # docker-compose-monitoring.yml
+              prometheus:
+                image: prom/prometheus
+                container_name: prometheus
+                volumes:
+                  - ./prometheus.yml:/etc/prometheus/prometheus.yml
+                ports:
+                  - "9090:9090"
+                networks:
+                  - chall_network
+            
+              grafana:
+                image: grafana/grafana
+                container_name: grafana
+                ports:
+                  - "3000:3000"
+                networks:
+                  - chall_network
+            
+              loki:
+                image: grafana/loki
+                container_name: loki
+                ports:
+                  - "3100:3100"
+                volumes:
+                  - ./loki-config.yml:/etc/loki/loki-config.yml
+                networks:
+                  - chall_network
+            
+              promtail:
+                image: grafana/promtail
+                container_name: promtail
+                volumes:
+                  - ./promtail-config.yml:/etc/promtail/promtail-config.yml
+                  - /var/log:/var/log
+                command:
+                  -config.file=/etc/promtail/promtail-config.yml
+                networks:
+                  - chall_network
+            
+              cadvisor:
+                image: gcr.io/cadvisor/cadvisor:latest
+                container_name: cadvisor
+                ports:
+                  - "8082:8080"
+                volumes:
+                    - /:/rootfs:ro
+                    - /var/run:/var/run:rw
+                    - /sys:/sys:ro
+                    - /var/lib/docker/:/var/lib/docker:ro
+                networks:
+                  - chall_network
+            
+            volumes:
+              postgres_data:
+            
+            networks:
+              chall_network:
 
 
 
