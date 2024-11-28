@@ -431,9 +431,37 @@ Generating SSL certificate
               chall_network:
 
 
+The nginx.conf file sets up the proxy host for sub-domains, enables www to non-www redirection and HTTP to HTTPS redirection, and routes traffic over HTTPS.
+
+        docker compose up frontend nginx --force-recreate
+
+
+## Test the Deployment
+Verify that each service is running and securely accessible.
+
+- **FastAPI Backend**: liberttinnii.xyz/api
+
+- **FastAPI Backend Docs**: liberttinnii.xyz/docs
+
+- **FastAPI Backend Redoc**: liberttinnii.xyz/redoc
+
+- **Prometheus**: liberttinnii.xyz/prometheus
+
+- **Grafana**: liberttinnii.xyz/grafana
+
+- **Node.js Frontend**: liberttinnii.xyz
+
+- **Adminer**: db.liberttinnii.xyz
 
 
 
+Test that HTTP to HTTPS redirection and www to non-www redirection are working:
+
+- liberttinnii.xyz
+
+- https://www.liberttinnii.xyz
+
+- http://www.db.liberttinnii.xyz
 
 
 
